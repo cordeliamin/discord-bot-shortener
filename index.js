@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token } = require('./config.json');
-
+const config = require('./config.json');
+const prefix = config.prefix;
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -14,8 +14,10 @@ for (const file of commandFiles) {
 	client.commands.set(command.name, command);
 }
 
-
 client.once('ready', () => {
+    // set bot's status
+    client.user.setPresence({ activity: { name: "ur mum", type: "WATCHING" },
+                                    status: "online" });
 	console.log('Ready!');
 });
 
@@ -33,9 +35,9 @@ client.on('message', message => {
                     || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
     if (!command) return;
 
-    // if it requires arguments but didn't get any return early
+    // if it requires arguments but didn't get any, return early
     if (command.args && !args.length) {
-            return message.channel.send(`You forgot the arguments, dipshit`);
+            return message.channel.send(`You forgot the argument(s)`);
     }
 
 	try {
@@ -48,4 +50,5 @@ client.on('message', message => {
 
 });
 
-client.login(client.login(token));
+client.login(config.token);
+
