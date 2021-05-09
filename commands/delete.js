@@ -2,13 +2,10 @@ module.exports = {
 	name: 'delete',
 	description: 'Delete a specified number of messages from this channel.',
 	args: true,
+    permissions: 'ADMINISTRATOR',
 	async execute(message, args) {
 		const amount = args[0];
-        // only I am allowed to delete
-        if(message.author.id !== '368851887581298691') {
-            message.channel.send("You are not allowed to use that command.");
-        }
-		else if(isNaN(amount)) {
+		if(isNaN(amount)) {
             message.channel.send("Error: Requires a number as an argument.");
         }
         else if(amount > 100) {

@@ -1,11 +1,17 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const config = require('./config.json');
-const prefix = config.prefix;
+const { prefix } = require('./config.json');    // command prefix
+const mongoose = require("mongoose");
+const shortSchema = require("./models/ShortenedURL.js");
+const express = require('express');
+require("dotenv").config();
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
+const app = express();
 
+// getting command files
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
 
@@ -14,41 +20,37 @@ for (const file of commandFiles) {
 	client.commands.set(command.name, command);
 }
 
-client.once('ready', () => {
-    // set bot's status
-    client.user.setPresence({ activity: { name: "ur mum", type: "WATCHING" },
-                                    status: "online" });
-	console.log('Ready!');
+// getting event files
+for (const file of eventFiles) {
+	const event = require(`./events/${file}`);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args, client));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args, client));
+	}
+}
+
+// connect to database
+mongoose.connect(process.env.DBConnection, { useNewUrlParser: true }, () => {
+	console.log("connected to database");
 });
 
-client.on('message', message => {
-    // return early if not a command
-	if (!message.content.startsWith(prefix) || message.author.bot) return;
+// function to check if the shortened link is valid
+const shortIDExists = (id) => shortSchema.findOne({ short_id: id });
 
-    // remove prefix and split into arguments
-    const args = message.content.slice(prefix.length).split(/ +/);
-    // pop command name
-    const commandName = args.shift().toLowerCase();
-
-    // gets commandName or its alias
-    const command = client.commands.get(commandName)
-                    || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-    if (!command) return;
-
-    // if it requires arguments but didn't get any, return early
-    if (command.args && !args.length) {
-            return message.channel.send(`You forgot the argument(s)`);
-    }
-
-	try {
-        command.execute(message, args);
-    }
-    catch (error) {
-        console.error(error);
-        message.reply('there was an error trying to execute that command!');
-    }
-
+// route to handle shortened links
+app.get('/:shortID', (req, res) => {
+	const shortID = req.params.shortID;
+	shortIDExists(shortID)
+		.then(doc => {
+			if (!doc) {
+				return res.send('Uh oh. We could not find a link at that URL');
+			}
+			res.redirect(doc.original_url)
+		})
+		.catch(console.error);
 });
 
-client.login(config.token);
+// log in to discord
+client.login(process.env.TOKEN);
 
