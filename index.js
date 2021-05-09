@@ -33,7 +33,7 @@ for (const file of eventFiles) {
 }
 
 // connect to database
-mongoose.connect(process.env.DBConnection, { useNewUrlParser: true }, () => {
+mongoose.connect(process.env.DBConnection, { useNewUrlParser: true, useUnifiedTopology: true }, () => {
 	console.log("connected to database");
 });
 
@@ -47,6 +47,7 @@ app.get('/', (_, res) => {
 
 // route to handle shortened links
 app.get('/:shortID', (req, res) => {
+	console.log("Received GET request for shortened link.");
 	const shortID = req.params.shortID;
 	shortIDExists(shortID)
 		.then(doc => {
