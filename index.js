@@ -38,6 +38,11 @@ mongoose.connect(process.env.DBConnection, { useNewUrlParser: true }, () => {
 // function to check if the shortened link is valid
 const shortIDExists = (id) => shortSchema.findOne({ short_id: id });
 
+// home route
+app.get('/', (_, res) => {
+	res.send("Howdy!");
+});
+
 // route to handle shortened links
 app.get('/:shortID', (req, res) => {
 	const shortID = req.params.shortID;
