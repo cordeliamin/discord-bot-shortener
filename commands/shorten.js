@@ -42,12 +42,11 @@ module.exports = {
 		});
 		const shortened = await shorten(originalUrl);
 		if(shortened){
-			message.reply(path.join("https://discord-shortener.herokuapp.com/", shortened));
+			message.reply(`https://discord-shortener.herokuapp.com/${shortened}`);
 		}
 		else{
 			message.reply("Couldn't shorten");
 		}
-		console.log(`Shortened ${originalUrl} to ${shortened}`);
 		
 	}
 };
