@@ -6,24 +6,24 @@ const dns = require('dns');
 const shorten = async (originalURL) => {
 	try {
 		const queryResult = await shortSchema.findOneAndUpdate({ longURL: originalURL },
-		{
-		  $setOnInsert: {
-			longURL: originalURL,
-			shortID: nanoid(7),
-		  },
-		},
-		{
-		  returnOriginal: false,
-		  upsert: true,
-		  useFindAndModify: false
-		}
-	  );
-	  return queryResult.shortID;
+			{
+				$setOnInsert: {
+					longURL: originalURL,
+					shortID: nanoid(7),
+				},
+			},
+			{
+				returnOriginal: false,
+				upsert: true,
+				useFindAndModify: false
+			}
+		);
+		return queryResult.shortID;
 	} catch (error) {
 		return console.error(error);
 	}
-	
-	
+
+
 };
 
 module.exports = {
@@ -41,19 +41,23 @@ module.exports = {
 		}
 
 		// checking if the URL is valid 
-		dns.lookup(originalUrl.hostname, (err) => {
-			if (err) {
-				return console.error("Error: Address not found");
-			};
+		dns.lookup(originalUrl.hostname, async (err) => {
+			if (!err){ 
+				const shortened = await shorten(originalUrl);
+				if (shortened) {
+					//respond with the new link and delete the message containing the old one
+					message.reply(`https://discord-shortener.herokuapp.com/${shortened}`);
+					message.delete();
+				}
+				else {
+					message.reply("Couldn't shorten");
+				}
+			}
+			else{
+				console.error("Error: DNS lookup failed");
+			}
 		});
-		const shortened = await shorten(originalUrl);
-		if(shortened){
-			message.reply(`https://discord-shortener.herokuapp.com/${shortened}`);
-			message.delete();
-		}
-		else{
-			message.reply("Couldn't shorten");
-		}
-		
+
+
 	}
 };
