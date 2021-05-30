@@ -11,7 +11,9 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 const app = express();
 
-const server = app.listen(process.env.PORT, () => {
+const PORT = process.env.PORT || 3000;
+app.set("port", PORT)
+const server = app.listen(PORT, () => {
 	console.log(`Express running → PORT ${server.address().port}`);
   });
 
