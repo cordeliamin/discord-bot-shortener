@@ -4,7 +4,8 @@ const shortSchema = require("../models/ShortenedURL.js");
 const dns = require('dns');
 
 const shorten = async (originalURL) => {
-	const queryResult = await shortSchema.findOneAndUpdate({ longURL: originalURL },
+	try {
+		const queryResult = await shortSchema.findOneAndUpdate({ longURL: originalURL },
 		{
 		  $setOnInsert: {
 			longURL: originalURL,
@@ -17,7 +18,12 @@ const shorten = async (originalURL) => {
 		  useFindAndModify: false
 		}
 	  );
-	return queryResult.shortID;
+	  return queryResult.shortID;
+	} catch (error) {
+		return console.error(error);
+	}
+	
+	
 };
 
 module.exports = {

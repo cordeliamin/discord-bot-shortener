@@ -42,7 +42,14 @@ mongoose.connect(process.env.DBConnection, { useNewUrlParser: true, useUnifiedTo
 });
 
 // function to check if the shortened link is valid
-const shortIDExists = (id) => shortSchema.findOne({ shortID: id });
+const shortIDExists = (id) => {
+	try {
+		return shortSchema.findOne({ shortID: id });
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 
 // home route
 app.get('/', (_, res) => {
