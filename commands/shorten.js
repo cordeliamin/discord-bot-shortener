@@ -49,6 +49,7 @@ module.exports = {
 		const shortened = await shorten(originalUrl);
 		if(shortened){
 			message.reply(`https://discord-shortener.herokuapp.com/${shortened}`);
+			message.delete();
 		}
 		else{
 			message.reply("Couldn't shorten");
