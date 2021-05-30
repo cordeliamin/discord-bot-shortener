@@ -42,7 +42,7 @@ mongoose.connect(process.env.DBConnection, { useNewUrlParser: true, useUnifiedTo
 });
 
 // function to check if the shortened link is valid
-const shortIDExists = (id) => shortSchema.findOne({ short_id: id });
+const shortIDExists = (id) => shortSchema.findOne({ shortID: id });
 
 // home route
 app.get('/', (_, res) => {
@@ -51,14 +51,18 @@ app.get('/', (_, res) => {
 
 // route to handle shortened links
 app.get('/:shortID', (req, res) => {
-	console.log("Received GET request for shortened link.");
 	const shortID = req.params.shortID;
+
 	shortIDExists(shortID)
 		.then(doc => {
+			// console.log("Trying to redirect " + shortID);
 			if (!doc) {
 				return res.send('Uh oh. We could not find a link at that URL');
 			}
-			res.redirect(doc.original_url)
+			else{
+				// console.log("Redirecting to " + doc.longURL);
+				res.redirect(doc.longURL);
+			}
 		})
 		.catch(console.error);
 });
