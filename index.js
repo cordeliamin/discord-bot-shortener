@@ -12,6 +12,9 @@ const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'
 const app = express();
 
 app.set('port', 4100);
+const server = app.listen(app.get('port'), () => {
+	console.log(`Express running → PORT ${server.address().port}`);
+  });
 
 // getting command files
 for (const file of commandFiles) {
